@@ -12,6 +12,7 @@ abstract class Command extends SymfonyCommand
     private $output;
 
     protected $dir;
+    protected $composerJsonDir;
     protected $hooks;
     protected $gitDir;
     protected $lockDir;
@@ -39,7 +40,8 @@ abstract class Command extends SymfonyCommand
         }
         $this->lockFile = (null !== $this->lockDir ? ($this->lockDir . '/') : '') . Hook::LOCK_FILE;
 
-        $this->hooks = Hook::getValidHooks($this->global ? $this->dir : getcwd());
+        $this->composerDir = $this->global ? $this->dir : getcwd();
+        $this->hooks = Hook::getValidHooks($this->composerDir);
 
         $this->init($input);
         $this->command();

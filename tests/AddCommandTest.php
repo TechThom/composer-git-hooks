@@ -260,9 +260,48 @@ class AddCommandTest extends TestCase
             $this->assertContains("Added {$hook} hook", $this->commandTester->getDisplay());
 
             $content = file_get_contents(".git/hooks/" . $hook);
-            $this->assertContains(implode(" && \\" . PHP_EOL, $scripts), $content);
+            $this->assertContains(implode(PHP_EOL, $scripts), $content);
         }
     }
+
+
+    /**
+     * @test
+     */
+    public function it_uses_commands_sequence_for_configured_hooks_only()
+    {
+        $hooks = [
+            'config' => [
+                'pre-commit',
+            ],
+            'pre-commit' => [
+                'echo pre-commit first',
+                'echo pre-commit second',
+                'echo pre-commit third',
+            ],
+            'post-commit' => [
+                'echo post-commit first',
+                'echo post-commit second',
+                'echo post-commit third',
+            ],
+        ];
+        self::createTestComposerFile('.', $hooks);
+
+        $this->commandTester->execute([]);
+
+        $content = file_get_contents(".git/hooks/pre-commit");
+        $expected = 'echo pre-commit first && \\'. PHP_EOL.
+                'echo pre-commit second && \\'. PHP_EOL.
+                'echo pre-commit third';
+        $this->assertContains($expected, $content);
+
+        $content = file_get_contents(".git/hooks/post-commit");
+        $expected = 'echo pre-commit first'. PHP_EOL.
+                'echo pre-commit second'. PHP_EOL.
+                'echo pre-commit third';
+        $this->assertContains($expected, $content);
+    }
+
 
     /**
      * @test

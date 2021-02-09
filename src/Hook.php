@@ -2,9 +2,53 @@
 
 namespace BrainMaestro\GitHooks;
 
+use Exception;
+
 class Hook
 {
     const LOCK_FILE = 'cghooks.lock';
+
+    /**
+     * Get config section of the composer config file.
+     *
+     * @param  string $dir dir where to look for composer.json
+     * @param  string $section config section to fetch in the composer.json
+     *
+     * @return array
+     */
+    public static function getConfig($dir, $section)
+    {
+        if (in_array($section, ['command'])) {
+            throw new Exception("Invalid config section [{$section}]. Available sections: command.");
+        }
+
+        $composerFile = "{$dir}/composer.json";
+        if (!file_exists($composerFile)) {
+            return [];
+        }
+
+        $contents = file_get_contents($composerFile);
+        $json = json_decode($contents, true);
+        if (! isset($json['extra']['hooks']['config'][$section])) {
+            return [];
+        }
+
+        return $json['extra']['hooks']['config'][$section];
+    }
+
+    /**
+     * Check if the given hook is a sequence of commands.
+     *
+     * @param string $dir
+     * @param string $hook
+     * @return bool
+     */
+    public static function isHookWithCommandsSequence($dir, $hook)
+    {
+        $hooksWithSequence = self::getConfig($dir, 'commands');
+
+        return in_array($hook, $hooksWithSequence);
+    }
 
     /**
      * Get scripts section of the composer config file.
@@ -71,5 +115,25 @@ class Hook
            'push-to-checkout',
            'update',
         ]);
+    }
+
+    /**
+     * Return hook contents
+     *
+     * @param string $dir
+     * @param array|string $contents
+     * @param string $hook
+     *
+     * @return string
+     */
+    public static function getHookContents($dir, $contents, $hook)
+    {
+        if (is_array($contents)) {
+            $commandsSequence = Hook::isHookWithCommandsSequence($dir, $hook);
+            $separator = $commandsSequence ? ' && \\'.PHP_EOL : PHP_EOL;
+            $contents = implode($separator, $contents);
+        }
+
+        return $contents;
     }
 }
