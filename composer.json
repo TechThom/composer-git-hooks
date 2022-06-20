@@ -4,6 +4,7 @@
     "type": "library",
     "minimum-stability": "stable",
     "license": "MIT",
+    "version": "2.8.5",
     "keywords": [
         "git",
         "hook",
