@@ -6,7 +6,7 @@ use Exception;
 
 class Hook
 {
-    const LOCK_FILE = 'cghooks.lock';
+    public const LOCK_FILE = 'cghooks.lock';
 
     /**
      * Get config section of the composer config file.
