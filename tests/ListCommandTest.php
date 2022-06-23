@@ -24,7 +24,7 @@ class ListCommandTest extends TestCase
         $this->commandTester->execute([]);
 
         foreach (array_keys(self::$hooks) as $hook) {
-            $this->assertContains($hook, $this->commandTester->getDisplay());
+            $this->assertStringContainsString($hook, $this->commandTester->getDisplay());
         }
     }
 
@@ -39,7 +39,7 @@ class ListCommandTest extends TestCase
         $this->commandTester->execute(['--git-dir' => $gitDir]);
 
         foreach (array_keys(self::$hooks) as $hook) {
-            $this->assertContains($hook, $this->commandTester->getDisplay());
+            $this->assertStringContainsString($hook, $this->commandTester->getDisplay());
         }
     }
 
@@ -59,7 +59,7 @@ class ListCommandTest extends TestCase
         $this->commandTester->execute(['--global' => true]);
 
         foreach (array_keys(self::$hooks) as $hook) {
-            $this->assertContains($hook, $this->commandTester->getDisplay());
+            $this->assertStringContainsString($hook, $this->commandTester->getDisplay());
         }
     }
 }
