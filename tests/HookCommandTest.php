@@ -13,11 +13,11 @@ class HookCommandTest extends TestCase
     public function it_tests_hooks_that_exist()
     {
         foreach (self::$hooks as $hook => $script) {
-            $command = new HookCommand($hook, $script);
+            $command = new HookCommand($hook, $script, '..');
             $commandTester = new CommandTester($command);
 
             $commandTester->execute([]);
-            $this->assertContains(str_replace('echo ', '', $script), $commandTester->getDisplay());
+            $this->assertStringContainsString(str_replace('echo ', '', $script), $commandTester->getDisplay());
         }
     }
 
@@ -33,11 +33,11 @@ class HookCommandTest extends TestCase
             ],
         ];
 
-        $command = new HookCommand('pre-commit', $hook['pre-commit']);
+        $command = new HookCommand('pre-commit', $hook['pre-commit'], '..');
         $commandTester = new CommandTester($command);
 
         $commandTester->execute([]);
-        $this->assertContains('execution-error', $commandTester->getDisplay());
-        $this->assertNotContains('before-commit', $commandTester->getDisplay());
+        $this->assertStringContainsString('execution-error', $commandTester->getDisplay());
+        $this->assertStringNotContainsString('before-commit', $commandTester->getDisplay());
     }
 }

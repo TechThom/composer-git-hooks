@@ -24,7 +24,7 @@ class AddCommandTest extends TestCase
         $this->commandTester->execute([]);
 
         foreach (array_keys(self::$hooks) as $hook) {
-            $this->assertContains("Added {$hook} hook", $this->commandTester->getDisplay());
+            $this->assertStringContainsString("Added {$hook} hook", $this->commandTester->getDisplay());
         }
     }
 
@@ -40,7 +40,7 @@ class AddCommandTest extends TestCase
         $this->commandTester->execute([]);
 
         foreach (array_keys(self::$hooks) as $hook) {
-            $this->assertContains("Added {$hook} hook", $this->commandTester->getDisplay());
+            $this->assertStringContainsString("Added {$hook} hook", $this->commandTester->getDisplay());
 
             $content = file_get_contents(".git/hooks/" . $hook);
             $this->assertNotFalse(strpos($content, "#!/bin/bash"));
@@ -57,10 +57,10 @@ class AddCommandTest extends TestCase
         $this->commandTester->execute([], ['verbosity' => OutputInterface::VERBOSITY_VERBOSE]);
 
         foreach (array_keys(self::$hooks) as $hook) {
-            $this->assertContains("{$hook} already exists", $this->commandTester->getDisplay());
+            $this->assertStringContainsString("{$hook} already exists", $this->commandTester->getDisplay());
         }
 
-        $this->assertContains('No hooks were added. Try updating', $this->commandTester->getDisplay());
+        $this->assertStringContainsString('No hooks were added. Try updating', $this->commandTester->getDisplay());
     }
 
     /**
@@ -78,9 +78,9 @@ class AddCommandTest extends TestCase
         $this->commandTester->execute([], ['verbosity' => OutputInterface::VERBOSITY_VERBOSE]);
 
         foreach (array_keys(self::$hooks) as $hook) {
-            $this->assertContains("{$hook} is up to date", $this->commandTester->getDisplay());
+            $this->assertStringContainsString("{$hook} is up to date", $this->commandTester->getDisplay());
         }
-        $this->assertContains('All hooks are up to date', $this->commandTester->getDisplay());
+        $this->assertStringContainsString('All hooks are up to date', $this->commandTester->getDisplay());
 
         self::$hooks = $originalHooks;
     }
@@ -94,7 +94,7 @@ class AddCommandTest extends TestCase
         $this->commandTester->execute(['--force' => true]);
 
         foreach (array_keys(self::$hooks) as $hook) {
-            $this->assertContains("Updated {$hook} hook", $this->commandTester->getDisplay());
+            $this->assertStringContainsString("Updated {$hook} hook", $this->commandTester->getDisplay());
         }
     }
 
@@ -106,7 +106,7 @@ class AddCommandTest extends TestCase
         $currentDir = realpath(getcwd());
         $this->commandTester->execute([], ['verbosity' => OutputInterface::VERBOSITY_VERBOSE]);
 
-        $this->assertContains('Created ' . $currentDir . '/' . Hook::LOCK_FILE . ' file', $this->commandTester->getDisplay());
+        $this->assertStringContainsString('Created ' . $currentDir . '/' . Hook::LOCK_FILE . ' file', $this->commandTester->getDisplay());
         $this->assertFileExists(Hook::LOCK_FILE);
         $this->assertEquals(json_encode(array_keys(self::$hooks)), file_get_contents(Hook::LOCK_FILE));
     }
@@ -124,7 +124,7 @@ class AddCommandTest extends TestCase
         $hookFile = $currentDir . '/../' . $lockDir . '/' . Hook::LOCK_FILE;
         $this->commandTester->execute(['--lock-dir' => dirname($hookFile)], ['verbosity' => OutputInterface::VERBOSITY_VERBOSE]);
 
-        $this->assertContains('Created '. $hookFile . ' file', $this->commandTester->getDisplay());
+        $this->assertStringContainsString('Created '. $hookFile . ' file', $this->commandTester->getDisplay());
         $this->assertFileExists($hookFile);
         $this->assertEquals(json_encode(array_keys(self::$hooks)), file_get_contents($hookFile));
         self::rmdir('../' . $lockDir);
@@ -138,8 +138,8 @@ class AddCommandTest extends TestCase
         $currentDir = realpath(getcwd());
         $this->commandTester->execute(['--no-lock' => true], ['verbosity' => OutputInterface::VERBOSITY_VERBOSE]);
 
-        $this->assertContains('Skipped creating a ' . Hook::LOCK_FILE . ' file', $this->commandTester->getDisplay());
-        $this->assertFileNotExists(Hook::LOCK_FILE);
+        $this->assertStringContainsString('Skipped creating a ' . Hook::LOCK_FILE . ' file', $this->commandTester->getDisplay());
+        $this->assertFileDoesNotExist(Hook::LOCK_FILE);
     }
 
     /**
@@ -150,7 +150,7 @@ class AddCommandTest extends TestCase
         $currentDir = realpath(getcwd());
         $this->commandTester->execute([], ['verbosity' => OutputInterface::VERBOSITY_VERBOSE]);
 
-        $this->assertContains('Skipped adding ' . Hook::LOCK_FILE . ' to .gitignore', $this->commandTester->getDisplay());
+        $this->assertStringContainsString('Skipped adding ' . Hook::LOCK_FILE . ' to .gitignore', $this->commandTester->getDisplay());
         $this->assertFalse(strpos(file_get_contents('.gitignore'), Hook::LOCK_FILE));
     }
 
@@ -161,7 +161,7 @@ class AddCommandTest extends TestCase
     {
         $this->commandTester->execute(['--ignore-lock' => true], ['verbosity' => OutputInterface::VERBOSITY_VERBOSE]);
 
-        $this->assertContains('Added ' . Hook::LOCK_FILE . ' to .gitignore', $this->commandTester->getDisplay());
+        $this->assertStringContainsString('Added ' . Hook::LOCK_FILE . ' to .gitignore', $this->commandTester->getDisplay());
         $this->assertTrue(strpos(file_get_contents('.gitignore'), Hook::LOCK_FILE) !== false);
     }
 
@@ -173,7 +173,7 @@ class AddCommandTest extends TestCase
         file_put_contents('.gitignore', Hook::LOCK_FILE . PHP_EOL, FILE_APPEND);
         $this->commandTester->execute(['--ignore-lock' => true], ['verbosity' => OutputInterface::VERBOSITY_VERBOSE]);
 
-        $this->assertNotContains('Added ' . Hook::LOCK_FILE . ' to .gitignore', $this->commandTester->getDisplay());
+        $this->assertStringNotContainsString('Added ' . Hook::LOCK_FILE . ' to .gitignore', $this->commandTester->getDisplay());
         $this->assertTrue(strpos(file_get_contents('.gitignore'), Hook::LOCK_FILE) !== false);
     }
 
@@ -202,9 +202,9 @@ class AddCommandTest extends TestCase
         self::removeTestComposerFile(); // so that there will be no hooks to add
         $this->commandTester->execute([]);
 
-        $this->assertContains('No hooks were added. Try updating', $this->commandTester->getDisplay());
+        $this->assertStringContainsString('No hooks were added. Try updating', $this->commandTester->getDisplay());
         foreach (array_keys(self::$hooks) as $hook) {
-            $this->assertFileNotExists(".git/hooks/{$hook}");
+            $this->assertFileDoesNotExist(".git/hooks/{$hook}");
         }
     }
 
@@ -232,7 +232,7 @@ class AddCommandTest extends TestCase
         $this->commandTester->execute(['--force-win' => true]);
 
         foreach (array_keys(self::$hooks) as $hook) {
-            $this->assertContains("Added {$hook} hook", $this->commandTester->getDisplay());
+            $this->assertStringContainsString("Added {$hook} hook", $this->commandTester->getDisplay());
 
             $content = file_get_contents(".git/hooks/" . $hook);
             $this->assertNotFalse(strpos($content, "#!/bin/bash"));
@@ -257,10 +257,10 @@ class AddCommandTest extends TestCase
         $this->commandTester->execute([]);
 
         foreach ($hooks as $hook => $scripts) {
-            $this->assertContains("Added {$hook} hook", $this->commandTester->getDisplay());
+            $this->assertStringContainsString("Added {$hook} hook", $this->commandTester->getDisplay());
 
             $content = file_get_contents(".git/hooks/" . $hook);
-            $this->assertContains(implode(PHP_EOL, $scripts), $content);
+            $this->assertStringContainsString(implode(PHP_EOL, $scripts), $content);
         }
     }
 
@@ -290,16 +290,16 @@ class AddCommandTest extends TestCase
         $this->commandTester->execute([]);
 
         $content = file_get_contents(".git/hooks/pre-commit");
-        $expected = 'echo pre-commit first && \\'. PHP_EOL.
-                'echo pre-commit second && \\'. PHP_EOL.
-                'echo pre-commit third';
-        $this->assertContains($expected, $content);
-
-        $content = file_get_contents(".git/hooks/post-commit");
         $expected = 'echo pre-commit first'. PHP_EOL.
                 'echo pre-commit second'. PHP_EOL.
                 'echo pre-commit third';
-        $this->assertContains($expected, $content);
+        $this->assertStringContainsString($expected, $content);
+
+        $content = file_get_contents(".git/hooks/post-commit");
+        $expected = 'echo post-commit first'. PHP_EOL.
+                'echo post-commit second'. PHP_EOL.
+                'echo post-commit third';
+        $this->assertStringContainsString($expected, $content);
     }
 
 
@@ -319,16 +319,16 @@ class AddCommandTest extends TestCase
         );
 
         foreach (array_keys(self::$hooks) as $hook) {
-            $this->assertContains("Added {$hook} hook", $this->commandTester->getDisplay());
+            $this->assertStringContainsString("Added {$hook} hook", $this->commandTester->getDisplay());
             $this->assertFileExists("{$hookDir}/{$hook}");
         }
 
         $hookDir = realpath("{$gitDir}/hooks");
-        $this->assertContains(
+        $this->assertStringContainsString(
             'About to modify global git hook path. There was no previous value',
             $this->commandTester->getDisplay()
         );
-        $this->assertContains("Global git hook path set to {$hookDir}", $this->commandTester->getDisplay());
+        $this->assertStringContainsString("Global git hook path set to {$hookDir}", $this->commandTester->getDisplay());
         $this->assertEquals($hookDir, global_hook_dir());
     }
 
@@ -350,16 +350,16 @@ class AddCommandTest extends TestCase
         );
 
         foreach (array_keys(self::$hooks) as $hook) {
-            $this->assertContains("Added {$hook} hook", $this->commandTester->getDisplay());
+            $this->assertStringContainsString("Added {$hook} hook", $this->commandTester->getDisplay());
             $this->assertFileExists("{$hookDir}/{$hook}");
         }
 
         $hookDir = realpath("{$gitDir}/hooks");
-        $this->assertContains(
+        $this->assertStringContainsString(
             "About to modify global git hook path. Previous value was {$previousHookDir}",
             $this->commandTester->getDisplay()
         );
-        $this->assertContains("Global git hook path set to {$hookDir}", $this->commandTester->getDisplay());
+        $this->assertStringContainsString("Global git hook path set to {$hookDir}", $this->commandTester->getDisplay());
         $this->assertEquals($hookDir, global_hook_dir());
     }
 
@@ -381,15 +381,15 @@ class AddCommandTest extends TestCase
         );
 
         foreach (array_keys(self::$hooks) as $hook) {
-            $this->assertContains("Added {$hook} hook", $this->commandTester->getDisplay());
+            $this->assertStringContainsString("Added {$hook} hook", $this->commandTester->getDisplay());
             $this->assertFileExists("{$hookDir}/{$hook}");
         }
 
-        $this->assertNotContains(
+        $this->assertStringNotContainsString(
             "About to modify global git hook path. Previous value was {$hookDir}",
             $this->commandTester->getDisplay()
         );
-        $this->assertNotContains("Global git hook path set to {$hookDir}", $this->commandTester->getDisplay());
+        $this->assertStringNotContainsString("Global git hook path set to {$hookDir}", $this->commandTester->getDisplay());
         $this->assertEquals($hookDir, global_hook_dir());
     }
 
@@ -409,21 +409,21 @@ class AddCommandTest extends TestCase
         $this->commandTester->execute(['--global' => true], ['verbosity' => OutputInterface::VERBOSITY_VERBOSE]);
 
         foreach (array_keys(self::$hooks) as $hook) {
-            $this->assertContains("Added {$hook} hook", $this->commandTester->getDisplay());
+            $this->assertStringContainsString("Added {$hook} hook", $this->commandTester->getDisplay());
             $this->assertFileExists("{$hookDir}/{$hook}");
         }
 
         $gitDir = realpath('test-global-composer-home-dir');
         $hookDir = "{$gitDir}/hooks";
-        $this->assertContains(
+        $this->assertStringContainsString(
             "No global git hook path was provided. Falling back to COMPOSER_HOME {$gitDir}",
             $this->commandTester->getDisplay()
         );
-        $this->assertContains(
+        $this->assertStringContainsString(
             "About to modify global git hook path. There was no previous value",
             $this->commandTester->getDisplay()
         );
-        $this->assertContains("Global git hook path set to {$hookDir}", $this->commandTester->getDisplay());
+        $this->assertStringContainsString("Global git hook path set to {$hookDir}", $this->commandTester->getDisplay());
         $this->assertEquals($hookDir, global_hook_dir());
     }
 
@@ -439,10 +439,10 @@ class AddCommandTest extends TestCase
         $this->commandTester->execute(['--global' => true], ['verbosity' => OutputInterface::VERBOSITY_VERBOSE]);
 
         foreach (array_keys(self::$hooks) as $hook) {
-            $this->assertNotContains("Updated {$hook} hook", $this->commandTester->getDisplay());
+            $this->assertStringNotContainsString("Updated {$hook} hook", $this->commandTester->getDisplay());
         }
 
-        $this->assertContains(
+        $this->assertStringContainsString(
             'You did not specify a git directory to use',
             $this->commandTester->getDisplay()
         );
@@ -462,8 +462,8 @@ class AddCommandTest extends TestCase
         $this->commandTester->execute([]);
 
         foreach (array_keys(self::$hooks) as $hook) {
-            $this->assertContains("Added {$hook} hook", $this->commandTester->getDisplay());
-            $this->assertFileNotExists(".git/hooks/{$hook}");
+            $this->assertStringContainsString("Added {$hook} hook", $this->commandTester->getDisplay());
+            $this->assertFileDoesNotExist(".git/hooks/{$hook}");
             $this->assertFileExists("{$currentDir}/.git/hooks/{$hook}");
         }
 
